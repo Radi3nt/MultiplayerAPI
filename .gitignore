@@ -1,0 +1,5 @@
+# Project exclude paths
+/src/main/java/fr/radi3nt/multi/main/packets/server/packets/encryption/
+/target/
+.idea
+MultiplayerTest.iml
