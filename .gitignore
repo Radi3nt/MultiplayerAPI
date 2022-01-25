@@ -2,4 +2,5 @@
 /src/main/java/fr/radi3nt/multi/main/packets/server/packets/encryption/
 /target/
 .idea
+pom.xml
 MultiplayerTest.iml
