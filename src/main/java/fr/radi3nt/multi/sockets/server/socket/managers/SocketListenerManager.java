@@ -7,15 +7,39 @@ import fr.radi3nt.multi.sockets.shared.distant.managing.managers.shared.Listener
 import java.io.*;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SocketListenerManager implements ListenerManager {
 
     private final SocketConnectionManager serverSocketConnectionManager;
     private final Set<ActualListener> connectionListeners = new HashSet<>();
+    private final Queue<ByteArrayOutputStream> inPackets = new ConcurrentLinkedQueue<>();
+    private final Thread thread;
 
     public SocketListenerManager(SocketConnectionManager serverSocketConnectionManager) {
         this.serverSocketConnectionManager = serverSocketConnectionManager;
+        thread = new Thread(() -> {
+            while (serverSocketConnectionManager.isConnected()) {
+                ByteArrayOutputStream byteArrayOutputStream = inPackets.poll();
+                if (byteArrayOutputStream!=null) {
+                    byte[] messageByte = byteArrayOutputStream.toByteArray();
+                    try {
+                        byteArrayOutputStream.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    for (ActualListener connectionListener : connectionListeners) {
+                        if (connectionListener.needSupress())
+                            connectionListeners.remove(connectionListener);
+                        DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(messageByte, 0, messageByte.length));
+                        connectionListener.connectionListener.read(dataInputStream);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -42,6 +66,9 @@ public class SocketListenerManager implements ListenerManager {
     public void update() {
         if (!serverSocketConnectionManager.isConnected())
             throw new IllegalStateException("Socket is not connected");
+        if (!thread.isAlive()) {
+            thread.start();
+        }
         try {
             _update();
         } catch (IOException e) {
@@ -69,15 +96,7 @@ public class SocketListenerManager implements ListenerManager {
                 bytesRead += actualReadBytes;
             } while (bytesRead != bytesToRead);
 
-            byte[] messageByte = byteArrayInputStream.toByteArray();
-            dataOutputStream.flush();
-
-            for (ActualListener connectionListener : connectionListeners) {
-                if (connectionListener.needSupress())
-                    connectionListeners.remove(connectionListener);
-                DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(messageByte, 0, bytesToRead));
-                connectionListener.connectionListener.read(dataInputStream);
-            }
+            inPackets.add(byteArrayInputStream);
         }
     }
 

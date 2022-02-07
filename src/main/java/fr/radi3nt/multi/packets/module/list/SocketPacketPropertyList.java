@@ -9,7 +9,7 @@ import fr.radi3nt.multi.packets.module.types.PacketTotalSizeProperty;
 import fr.radi3nt.multi.packets.module.types.PacketTypeIDProperty;
 import fr.radi3nt.multi.packets.types.PacketIdentifier;
 
-public class SocketPacketPropertyList implements PacketPropertyList {
+public class SocketPacketPropertyList implements PacketPropertyList { //todo implement compression <- more extensibility
 
     private final PacketDataBufferProvider packetDataBufferProvider;
     private final PacketTypeIDProperty packetTypeIDProperty;
