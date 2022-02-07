@@ -81,20 +81,6 @@ public class SocketListenerManager implements ListenerManager {
         }
     }
 
-    public static int intToByteArray(int[] value, byte[] bytes, int offset) {
-        int size = 0;
-
-        for (int i = 0; i < value.length; i++) {
-            int intBits = value[i];
-            for (int a = 0; a < Integer.BYTES; a++) {
-                bytes[i * Integer.BYTES + a + offset] = new Integer(intBits).byteValue();
-                intBits = intBits >> 8;
-                size++;
-            }
-        }
-        return size;
-    }
-
     public static class ActualListener {
 
         private final ConnectionListener connectionListener;

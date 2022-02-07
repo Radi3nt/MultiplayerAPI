@@ -6,6 +6,7 @@ import fr.radi3nt.multi.main.packets.server.packets.PacketInClientDisconnect;
 import fr.radi3nt.multi.main.packets.server.packets.PacketOutServerStop;
 import fr.radi3nt.multi.main.packets.server.packets.alive.PacketInResponseKeepAlive;
 import fr.radi3nt.multi.main.packets.server.packets.alive.PacketOutServerAskKeepAlive;
+import fr.radi3nt.multi.main.packets.shared.ByteBufferPacketDataBuffer;
 import fr.radi3nt.multi.main.packets.shared.ContextPacketIndexer;
 import fr.radi3nt.multi.main.packets.shared.NetworkManager;
 import fr.radi3nt.multi.main.packets.shared.SocketPacketProtocol;
@@ -13,6 +14,7 @@ import fr.radi3nt.multi.main.packets.shared.connection.SocketConnectionListener;
 import fr.radi3nt.multi.packets.data.types.PacketIn;
 import fr.radi3nt.multi.packets.data.types.PacketOut;
 import fr.radi3nt.multi.packets.logic.PacketInterceptor;
+import fr.radi3nt.multi.packets.module.list.SocketPacketPropertyList;
 import fr.radi3nt.multi.packets.process.CipherEncryptionHandler;
 import fr.radi3nt.multi.packets.process.recieving.PacketDecompressor;
 import fr.radi3nt.multi.packets.process.recieving.PacketDecrypter;
@@ -22,6 +24,7 @@ import fr.radi3nt.multi.sockets.shared.distant.connection.connections.Connection
 import fr.radi3nt.multi.sockets.shared.distant.connection.handle.ConnectionHandler;
 
 import javax.crypto.NullCipher;
+import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,7 +49,7 @@ public class PacketMainServer {
                 int currentId = id.getAndIncrement();
 
                 CipherEncryptionHandler cipherEncryptionHandler = new CipherEncryptionHandler(new NullCipher(), new NullCipher());
-                ServerPlayerConnection serverPlayerConnection = new ServerPlayerConnection(new NetworkManager(connection.getConnectionManager(), new SocketPacketProtocol(connection.getCommunicationManager(), connection.getListenerManager(), contextPacketIndexer, new PacketEncryptor(cipherEncryptionHandler), new PacketDecrypter(cipherEncryptionHandler), new PacketCompressor(), new PacketDecompressor(new Inflater()))));
+                ServerPlayerConnection serverPlayerConnection = new ServerPlayerConnection(new NetworkManager(connection.getConnectionManager(), new SocketPacketProtocol(connection.getCommunicationManager(), connection.getListenerManager(), contextPacketIndexer, new PacketEncryptor(cipherEncryptionHandler), new PacketDecrypter(cipherEncryptionHandler), new PacketCompressor(), new PacketDecompressor(new Inflater()), new SocketPacketPropertyList(size -> new ByteBufferPacketDataBuffer(ByteBuffer.allocate(size)), contextPacketIndexer))));
 
                 System.out.println("Server: accepted client " + currentId);
 

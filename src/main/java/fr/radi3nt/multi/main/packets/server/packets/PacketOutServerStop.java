@@ -1,6 +1,6 @@
 package fr.radi3nt.multi.main.packets.server.packets;
 
-import fr.radi3nt.multi.packets.data.serializer.PacketDataSerializer;
+import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 import fr.radi3nt.multi.packets.data.serializer.types.StringSerializer;
 import fr.radi3nt.multi.packets.data.types.PacketOut;
 import fr.radi3nt.multi.packets.types.PacketType;
@@ -18,8 +18,8 @@ public class PacketOutServerStop implements PacketOut {
     }
 
     @Override
-    public void save(PacketDataSerializer packetDataSerializer) {
-        packetDataSerializer.write(new StringSerializer(reason));
+    public void save(PacketDataBuffer packetDataBuffer) {
+        packetDataBuffer.write(new StringSerializer(reason));
     }
 
     @Override

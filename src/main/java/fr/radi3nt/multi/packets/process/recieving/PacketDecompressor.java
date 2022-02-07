@@ -1,7 +1,7 @@
 package fr.radi3nt.multi.packets.process.recieving;
 
-import fr.radi3nt.multi.main.packets.shared.ByteBufferPacketDataSerializer;
-import fr.radi3nt.multi.packets.data.serializer.PacketDataSerializer;
+import fr.radi3nt.multi.main.packets.shared.ByteBufferPacketDataBuffer;
+import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.zip.DataFormatException;
@@ -16,14 +16,14 @@ public class PacketDecompressor {
         this.inflater = inflater;
     }
 
-    public PacketDataSerializer decompress(PacketDataSerializer toCompress) throws DataFormatException {
+    public PacketDataBuffer decompress(PacketDataBuffer toCompress) throws DataFormatException {
         this.inflater.setInput(toCompress.getContent(), 0, toCompress.getSize());
 
         int actualBytesSize = 0;
         while(!this.inflater.finished()) {
             actualBytesSize += this.inflater.inflate(this.resultArray, actualBytesSize, this.resultArray.length-actualBytesSize);
         }
-        PacketDataSerializer written = new ByteBufferPacketDataSerializer(ByteBuffer.allocate(actualBytesSize));
+        PacketDataBuffer written = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(actualBytesSize));
         written.writeBytes(this.resultArray, 0, actualBytesSize);
 
         this.inflater.reset();

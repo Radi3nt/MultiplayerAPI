@@ -1,12 +1,12 @@
 package fr.radi3nt.multi.main.packets.shared;
 
-import fr.radi3nt.multi.packets.data.serializer.PacketDataSerializer;
-import fr.radi3nt.multi.packets.data.serializer.types.ByteSerializer;
+import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 import fr.radi3nt.multi.packets.data.serializer.types.IntSerializer;
 import fr.radi3nt.multi.packets.data.types.PacketIn;
 import fr.radi3nt.multi.packets.data.types.PacketOut;
 import fr.radi3nt.multi.packets.logic.PacketInterceptor;
 import fr.radi3nt.multi.packets.logic.PacketProtocol;
+import fr.radi3nt.multi.packets.module.list.PacketPropertyList;
 import fr.radi3nt.multi.packets.process.recieving.PacketDecoder;
 import fr.radi3nt.multi.packets.process.recieving.PacketDecompressor;
 import fr.radi3nt.multi.packets.process.recieving.PacketDecrypter;
@@ -23,11 +23,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.DataFormatException;
 
 public class SocketPacketProtocol implements PacketProtocol {
 
     private static final int MIN_BYTES_TO_ENCRYPT = 600;
+    private static final int BYTES_SIZE_DECOMPRESSED = Integer.BYTES;
+    private static final int BYTES_SIZE_COMPRESSED = Integer.BYTES;
 
     private final CommunicationManager communicationManager;
     private final ListenerManager listenerManager;
@@ -42,17 +43,19 @@ public class SocketPacketProtocol implements PacketProtocol {
     private final PacketCompressor packetCompressor;
     private final PacketDecompressor packetDecompressor;
 
+    private final PacketPropertyList packetPropertyList;
 
 
     private final List<PacketInterceptor> packetInterceptors = new ArrayList<>();
 
-    public SocketPacketProtocol(CommunicationManager communicationManager, ListenerManager listenerManager, PacketIdentifier packetIdentifier, PacketEncryptor packetEncryptor, PacketDecrypter packetDecrypter, PacketCompressor packetCompressor, PacketDecompressor packetDecompressor) {
+    public SocketPacketProtocol(CommunicationManager communicationManager, ListenerManager listenerManager, PacketIdentifier packetIdentifier, PacketEncryptor packetEncryptor, PacketDecrypter packetDecrypter, PacketCompressor packetCompressor, PacketDecompressor packetDecompressor, PacketPropertyList packetPropertyList) {
         this.communicationManager = communicationManager;
         this.listenerManager = listenerManager;
         this.packetEncryptor = packetEncryptor;
         this.packetDecrypter = packetDecrypter;
         this.packetCompressor = packetCompressor;
         this.packetDecompressor = packetDecompressor;
+        this.packetPropertyList = packetPropertyList;
         this.packetEncoder = new PacketEncoder();
         this.packetDecoder = new PacketDecoder(packetIdentifier);
 
@@ -67,23 +70,32 @@ public class SocketPacketProtocol implements PacketProtocol {
 
     private void receivePacket(DataInputStream dataInputStream) throws IOException {
         int size = dataInputStream.available();
-        byte[] bytes = new byte[size-Byte.BYTES];
-        boolean useCompress = dataInputStream.readByte()==0x01;
-        dataInputStream.read(bytes);
+        byte[] bytes = new byte[size];
 
-        PacketDataSerializer packetDataSerializer = new ByteBufferPacketDataSerializer(ByteBuffer.allocate(bytes.length));
-        packetDataSerializer.write(bytes);
-        packetDataSerializer.getBuffer().flip();
+        int readData = 0;
+        while (readData<size) {
+            readData += dataInputStream.read(bytes, readData, size-readData);
+        }
+
+        PacketDataBuffer received = new ByteBufferPacketDataBuffer(ByteBuffer.wrap(bytes));
+
+        PacketIn packetIn = packetPropertyList.decode(received);
+        notifyIn(packetIn);
+
+        /*
+        PacketDataBuffer packetDataBuffer = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(bytes.length));
+        packetDataBuffer.write(bytes);
+        packetDataBuffer.getBuffer().flip();
 
 
-        PacketDataSerializer written = packetDataSerializer;
+        PacketDataBuffer written = packetDataBuffer;
 
         PacketIn packet = null;
 
-        //System.out.println("receive size: " + packetDataSerializer.getSize());
+        //System.out.println("receive size: " + PacketDataBuffer.getSize());
         if (useCompress) {
             try {
-                written = packetDecompressor.decompress(packetDataSerializer);
+                written = packetDecompressor.decompress(packetDataBuffer);
             } catch (DataFormatException e) {
                 e.printStackTrace();
             }
@@ -94,7 +106,11 @@ public class SocketPacketProtocol implements PacketProtocol {
         packet = packetDecoder.decode(written);
 
 
+
+
         notifyIn(packet);
+
+         */
     }
 
     private void notifyIn(PacketIn packet) {
@@ -116,27 +132,37 @@ public class SocketPacketProtocol implements PacketProtocol {
         if (packet==null)
             return;
 
-        PacketDataSerializer packetDataSerializer = new ByteBufferPacketDataSerializer(ByteBuffer.allocate(packet.getByteSize()+Integer.BYTES+Integer.BYTES+Byte.BYTES));
 
-        boolean needCompress = packetDataSerializer.getSize()>=MIN_BYTES_TO_ENCRYPT;
+        PacketDataBuffer content = packetPropertyList.encode(packet);
+        PacketDataBuffer result = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(content.getSize()+Integer.BYTES));
+
+        result.write(new IntSerializer(content.getSize()));
+        content.getBuffer().flip();
+        result.write(content);
+
+        communicationManager.send(new SocketRequest(result.getContent()));
+
+        /*
+        PacketDataBuffer packetDataBuffer = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(packet.getByteSize()+ BYTES_SIZE_COMPRESSED + BYTES_SIZE_DECOMPRESSED +Byte.BYTES));
+
+        boolean needCompress = packetDataBuffer.getSize()>=MIN_BYTES_TO_ENCRYPT;
         if (!needCompress) {
-            packetDataSerializer.write(new IntSerializer(packetDataSerializer.getSize()-Integer.BYTES));
-            packetDataSerializer.write(new ByteSerializer((byte) 0x00));
+            packetDataBuffer.write(new IntSerializer(packetDataBuffer.getSize()-BYTES_SIZE_COMPRESSED));
+            packetDataBuffer.write(new IntSerializer(-1));
         }
-        //System.out.println("sent size: " + (packetDataSerializer.getSize()-Integer.BYTES));
 
-        packetEncoder.encode(packet, packetDataSerializer);
-        packetDataSerializer.getBuffer().flip();
+        packetEncoder.encode(packet, packetDataBuffer);
+        packetDataBuffer.getBuffer().flip();
 
-        PacketDataSerializer actualSerializer = packetDataSerializer;
+        PacketDataBuffer actualSerializer = packetDataBuffer;
         if (needCompress) {
-            actualSerializer = packetCompressor.compress(packetDataSerializer);
+            actualSerializer = packetCompressor.compress(packetDataBuffer);
             actualSerializer.getBuffer().flip();
-
-            //System.out.println("sent compress: "+ (actualSerializer.getSize()-Integer.BYTES-Byte.BYTES));
         }
 
         communicationManager.send(new SocketRequest(actualSerializer.getContent()));
+
+         */
     }
 
     @Override

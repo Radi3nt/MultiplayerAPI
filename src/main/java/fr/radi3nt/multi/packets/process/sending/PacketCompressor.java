@@ -1,7 +1,7 @@
 package fr.radi3nt.multi.packets.process.sending;
 
-import fr.radi3nt.multi.main.packets.shared.ByteBufferPacketDataSerializer;
-import fr.radi3nt.multi.packets.data.serializer.PacketDataSerializer;
+import fr.radi3nt.multi.main.packets.shared.ByteBufferPacketDataBuffer;
+import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 import fr.radi3nt.multi.packets.data.serializer.types.ByteSerializer;
 import fr.radi3nt.multi.packets.data.serializer.types.IntSerializer;
 
@@ -17,7 +17,7 @@ public class PacketCompressor {
         this.deflater = new Deflater();
     }
 
-    public PacketDataSerializer compress(PacketDataSerializer toCompress) {
+    public PacketDataBuffer compress(PacketDataBuffer toCompress) {
         this.deflater.setInput(toCompress.getContent(), 0, toCompress.getSize());
         this.deflater.finish();
 
@@ -28,7 +28,7 @@ public class PacketCompressor {
         }
 
 
-        PacketDataSerializer writted = new ByteBufferPacketDataSerializer(ByteBuffer.allocate(actualBytesSize+Integer.BYTES+Byte.BYTES));
+        PacketDataBuffer writted = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(actualBytesSize+Integer.BYTES+Byte.BYTES));
         writted.write(new IntSerializer(actualBytesSize+Byte.BYTES));
         writted.write(new ByteSerializer((byte) 0x01));
         writted.writeBytes(this.resultArray, 0, actualBytesSize);

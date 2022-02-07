@@ -1,6 +1,6 @@
 package fr.radi3nt.multi.packets.process.recieving;
 
-import fr.radi3nt.multi.packets.data.serializer.PacketDataSerializer;
+import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 import fr.radi3nt.multi.packets.data.serializer.types.IntSerializer;
 import fr.radi3nt.multi.packets.data.types.PacketIn;
 import fr.radi3nt.multi.packets.types.PacketIdentifier;
@@ -13,10 +13,10 @@ public class PacketDecoder {
         this.packetIdentifier = packetIdentifier;
     }
 
-    public PacketIn decode(PacketDataSerializer packetDataSerializer) {
-        int packetId = packetDataSerializer.read(new IntSerializer()).getInteger();
+    public PacketIn decode(PacketDataBuffer packetDataBuffer) {
+        int packetId = packetDataBuffer.read(new IntSerializer()).getInteger();
         PacketIn packet = packetIdentifier.newPacket(packetId);
-        packet.load(packetDataSerializer);
+        packet.load(packetDataBuffer);
         return packet;
     }
 

@@ -1,15 +1,15 @@
 package fr.radi3nt.multi.main.packets.shared;
 
-import fr.radi3nt.multi.packets.data.serializer.PacketDataSerializer;
+import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 import fr.radi3nt.multi.packets.data.serializer.PacketSerializer;
 
 import java.nio.ByteBuffer;
 
-public class ByteBufferPacketDataSerializer implements PacketDataSerializer {
+public class ByteBufferPacketDataBuffer implements PacketDataBuffer {
 
     private final ByteBuffer buffer;
 
-    public ByteBufferPacketDataSerializer(ByteBuffer buffer) {
+    public ByteBufferPacketDataBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
     }
 
@@ -29,6 +29,11 @@ public class ByteBufferPacketDataSerializer implements PacketDataSerializer {
     }
 
     @Override
+    public void write(PacketDataBuffer packetDataBuffer) {
+        buffer.put(packetDataBuffer.getBuffer());
+    }
+
+    @Override
     public byte[] read(int ahead) {
         byte[] bytes = new byte[ahead];
         buffer.get(bytes);
@@ -42,8 +47,8 @@ public class ByteBufferPacketDataSerializer implements PacketDataSerializer {
     }
 
     @Override
-    public void reset() {
-        buffer.reset();
+    public void clear() {
+        buffer.clear();
     }
 
     @Override

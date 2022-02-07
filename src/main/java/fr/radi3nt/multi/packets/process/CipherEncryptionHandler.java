@@ -1,6 +1,6 @@
 package fr.radi3nt.multi.packets.process;
 
-import fr.radi3nt.multi.packets.data.serializer.PacketDataSerializer;
+import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -18,7 +18,7 @@ public class CipherEncryptionHandler implements PacketEncryptionHandler {
     }
 
     @Override
-    public void encrypt(PacketDataSerializer toEncrypt, PacketDataSerializer toWrite) {
+    public void encrypt(PacketDataBuffer toEncrypt, PacketDataBuffer toWrite) {
         try {
             encrypt.doFinal(toEncrypt.getBuffer(), toWrite.getBuffer());
         } catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
@@ -27,7 +27,7 @@ public class CipherEncryptionHandler implements PacketEncryptionHandler {
     }
 
     @Override
-    public void decrypt(PacketDataSerializer toDecrypt, PacketDataSerializer toWrite) {
+    public void decrypt(PacketDataBuffer toDecrypt, PacketDataBuffer toWrite) {
         try {
             decrypt.doFinal(toDecrypt.getBuffer(), toWrite.getBuffer());
         } catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {

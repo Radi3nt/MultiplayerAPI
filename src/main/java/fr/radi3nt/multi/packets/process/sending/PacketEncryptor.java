@@ -1,6 +1,6 @@
 package fr.radi3nt.multi.packets.process.sending;
 
-import fr.radi3nt.multi.packets.data.serializer.PacketDataSerializer;
+import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 import fr.radi3nt.multi.packets.process.PacketEncryptionHandler;
 
 public class PacketEncryptor {
@@ -11,7 +11,7 @@ public class PacketEncryptor {
         this.packetEncryptionHandler = packetEncryptionHandler;
     }
 
-    public void encrypt(PacketDataSerializer data, PacketDataSerializer toWrite) {
+    public void encrypt(PacketDataBuffer data, PacketDataBuffer toWrite) {
         packetEncryptionHandler.encrypt(data, toWrite);
     }
 
