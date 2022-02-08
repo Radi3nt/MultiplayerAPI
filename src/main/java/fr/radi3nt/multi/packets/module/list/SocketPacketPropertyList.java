@@ -5,7 +5,7 @@ import fr.radi3nt.multi.packets.data.types.PacketIn;
 import fr.radi3nt.multi.packets.data.types.PacketOut;
 import fr.radi3nt.multi.packets.module.PacketDataBufferProvider;
 import fr.radi3nt.multi.packets.module.types.PacketContentProperty;
-import fr.radi3nt.multi.packets.module.types.PacketTotalSizeProperty;
+import fr.radi3nt.multi.packets.module.types.PacketSizeProperty;
 import fr.radi3nt.multi.packets.module.types.PacketTypeIDProperty;
 import fr.radi3nt.multi.packets.types.PacketIdentifier;
 
@@ -13,13 +13,11 @@ public class SocketPacketPropertyList implements PacketPropertyList { //todo imp
 
     private final PacketDataBufferProvider packetDataBufferProvider;
     private final PacketTypeIDProperty packetTypeIDProperty;
-    private final PacketTotalSizeProperty packetTotalSizeProperty;
     private final PacketContentProperty packetContentProperty;
 
     public SocketPacketPropertyList(PacketDataBufferProvider packetDataBufferProvider, PacketIdentifier packetIdentifier) {
         this.packetDataBufferProvider = packetDataBufferProvider;
         packetTypeIDProperty = new PacketTypeIDProperty(packetDataBufferProvider, packetIdentifier);
-        packetTotalSizeProperty = new PacketTotalSizeProperty(packetDataBufferProvider);
         packetContentProperty = new PacketContentProperty(packetDataBufferProvider);
     }
 
