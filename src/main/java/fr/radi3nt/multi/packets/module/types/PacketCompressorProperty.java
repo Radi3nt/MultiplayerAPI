@@ -1,25 +1,21 @@
 package fr.radi3nt.multi.packets.module.types;
 
-import com.sun.xml.internal.ws.api.message.Packet;
 import fr.radi3nt.multi.main.packets.shared.ByteBufferPacketDataBuffer;
 import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
+import fr.radi3nt.multi.packets.data.serializer.types.IntSerializer;
 import fr.radi3nt.multi.packets.module.PacketProperty;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.zip.*;
 
 public class PacketCompressorProperty implements PacketProperty {
 
-    private PacketDataBuffer content;
+    private PacketDataBuffer contentToSend;
+    private PacketDataBuffer contentToReceive;
 
-    public PacketCompressorProperty(Deflater deflater, Inflater inflater) {
-        this.deflater = deflater;
-        this.inflater = inflater;
-    }
 
     @Override
     public PacketDataBuffer encode() {
@@ -34,7 +30,7 @@ public class PacketCompressorProperty implements PacketProperty {
     private PacketDataBuffer encode_() throws IOException {
         int len;
         byte[] buff = new byte[64];
-        ByteArrayInputStream in = new ByteArrayInputStream(content.getContent());
+        ByteArrayInputStream in = new ByteArrayInputStream(contentToSend.getContent());
         DeflaterInputStream deflater = new DeflaterInputStream(in, new Deflater());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -42,7 +38,10 @@ public class PacketCompressorProperty implements PacketProperty {
             while ((len = deflater.read(buff)) > 0) {
                 out.write(buff, 0, len);
             }
-            return new ByteBufferPacketDataBuffer(ByteBuffer.wrap(out.toByteArray()));
+            PacketDataBuffer packetDataBuffer = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(len+Integer.BYTES));
+            packetDataBuffer.write(new IntSerializer(contentToSend.getSize()));
+            packetDataBuffer.write(out.toByteArray());
+            return packetDataBuffer;
         } finally {
             out.close();
             deflater.close();
@@ -52,11 +51,18 @@ public class PacketCompressorProperty implements PacketProperty {
 
     @Override
     public void decode(PacketDataBuffer packetDataBuffer) {
-        content = decode_(packetDataBuffer);
+        contentToReceive = null;
+        try {
+            contentToReceive = decode_(packetDataBuffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private PacketDataBuffer decode_(PacketDataBuffer packetDataBuffer) {
-        InflaterInputStream gzis = new InflaterInputStream(new ByteArrayInputStream(packetDataBuffer.getContent()));
+    private PacketDataBuffer decode_(PacketDataBuffer packetDataBuffer) throws IOException {
+        int decompressedSize = packetDataBuffer.read(new IntSerializer()).getInteger();
+
+        InflaterInputStream gzis = new InflaterInputStream(new ByteArrayInputStream(packetDataBuffer.read(decompressedSize)));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         while(gzis.available() > 0) {
@@ -67,11 +73,13 @@ public class PacketCompressorProperty implements PacketProperty {
         return new ByteBufferPacketDataBuffer(ByteBuffer.wrap(out.toByteArray()));
     }
 
-    public PacketDataBuffer getContent() {
-        return content;
+
+
+    public void setContentToSend(PacketDataBuffer contentToSend) {
+        this.contentToSend = contentToSend;
     }
 
-    public void setContent(PacketDataBuffer content) {
-        this.content = content;
+    public PacketDataBuffer getContentToReceive() {
+        return contentToReceive;
     }
 }
