@@ -5,32 +5,33 @@ import fr.radi3nt.multi.packets.data.serializer.types.IntSerializer;
 import fr.radi3nt.multi.packets.module.PacketDataBufferProvider;
 import fr.radi3nt.multi.packets.module.PacketProperty;
 
-public class PacketTotalSizeProperty implements PacketProperty {
+public class PacketSizeProperty implements PacketProperty {
 
     private final PacketDataBuffer packetDataBuffer;
-    private int size;
+    private int sizeToEncode;
+    private int sizeDecoded;
 
-    public PacketTotalSizeProperty(PacketDataBufferProvider packetDataBufferProvider) {
+    public PacketSizeProperty(PacketDataBufferProvider packetDataBufferProvider) {
         packetDataBuffer = packetDataBufferProvider.createBuffer(Integer.BYTES);;
     }
 
     @Override
     public PacketDataBuffer encode() {
         packetDataBuffer.clear();
-        packetDataBuffer.write(new IntSerializer(size));
+        packetDataBuffer.write(new IntSerializer(sizeToEncode));
         return packetDataBuffer;
     }
 
     @Override
     public void decode(PacketDataBuffer packetDataBuffer) {
-        size = packetDataBuffer.read(new IntSerializer()).getInteger();
+        sizeDecoded = packetDataBuffer.read(new IntSerializer()).getInteger();
     }
 
-    public int getSize() {
-        return size;
+    public void setSizeToEncode(int sizeToEncode) {
+        this.sizeToEncode = sizeToEncode;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public int getSizeDecoded() {
+        return sizeDecoded;
     }
 }
