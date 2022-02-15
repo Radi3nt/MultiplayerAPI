@@ -30,7 +30,7 @@ public class PacketCompressorProperty implements PacketProperty {
 
     private synchronized PacketDataBuffer encode_() throws IOException {
         int len;
-        byte[] buff = new byte[contentToSend.getSize()];
+        byte[] buff = new byte[4096];
         ByteArrayInputStream in = new ByteArrayInputStream(contentToSend.getContent());
         DeflaterInputStream deflater = new DeflaterInputStream(in, new Deflater());
 
