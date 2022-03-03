@@ -82,35 +82,6 @@ public class SocketPacketProtocol implements PacketProtocol {
         PacketIn packetIn = packetPropertyList.decode(received);
         notifyIn(packetIn);
 
-        /*
-        PacketDataBuffer packetDataBuffer = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(bytes.length));
-        packetDataBuffer.write(bytes);
-        packetDataBuffer.getBuffer().flip();
-
-
-        PacketDataBuffer written = packetDataBuffer;
-
-        PacketIn packet = null;
-
-        //System.out.println("receive size: " + PacketDataBuffer.getSize());
-        if (useCompress) {
-            try {
-                written = packetDecompressor.decompress(packetDataBuffer);
-            } catch (DataFormatException e) {
-                e.printStackTrace();
-            }
-
-            written.getBuffer().flip();
-        }
-
-        packet = packetDecoder.decode(written);
-
-
-
-
-        notifyIn(packet);
-
-         */
     }
 
     private void notifyIn(PacketIn packet) {

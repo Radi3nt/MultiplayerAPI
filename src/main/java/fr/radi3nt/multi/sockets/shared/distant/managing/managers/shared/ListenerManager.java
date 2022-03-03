@@ -11,4 +11,5 @@ public interface ListenerManager {
 
     void update();
 
+    void finish();
 }
