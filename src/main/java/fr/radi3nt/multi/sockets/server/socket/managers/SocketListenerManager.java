@@ -3,20 +3,22 @@ package fr.radi3nt.multi.sockets.server.socket.managers;
 import fr.radi3nt.multi.sockets.shared.distant.managing.listener.ConnectionListener;
 import fr.radi3nt.multi.sockets.shared.distant.managing.managers.impl.SocketConnectionManager;
 import fr.radi3nt.multi.sockets.shared.distant.managing.managers.shared.ListenerManager;
+import fr.radi3nt.multi.sockets.shared.util.Timings;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SocketListenerManager implements ListenerManager {
 
     private final SocketConnectionManager serverSocketConnectionManager;
-    private final Set<ActualListener> connectionListeners = new HashSet<>();
+    private final Set<ActualListener> connectionListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Queue<ByteArrayOutputStream> inPackets = new ConcurrentLinkedQueue<>();
     private final Thread thread;
+
+    private boolean firstExecution = true;
+    private DataInputStream enteringPackets;
 
     public SocketListenerManager(SocketConnectionManager serverSocketConnectionManager) {
         this.serverSocketConnectionManager = serverSocketConnectionManager;
@@ -26,7 +28,7 @@ public class SocketListenerManager implements ListenerManager {
                 if (byteArrayOutputStream!=null) {
                     byte[] messageByte = byteArrayOutputStream.toByteArray();
                     try {
-                        byteArrayOutputStream.flush();
+                        byteArrayOutputStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -36,10 +38,21 @@ public class SocketListenerManager implements ListenerManager {
                             connectionListeners.remove(connectionListener);
                         DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(messageByte, 0, messageByte.length));
                         connectionListener.connectionListener.read(dataInputStream);
+                        try {
+                            dataInputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
-        });
+        }, "Packet Listener Runner");
     }
 
     @Override
@@ -66,9 +79,19 @@ public class SocketListenerManager implements ListenerManager {
     public void update() {
         if (!serverSocketConnectionManager.isConnected())
             throw new IllegalStateException("Socket is not connected");
-        if (!thread.isAlive()) {
+
+        if (firstExecution) {
+            firstExecution = false;
+
             thread.start();
+            try {
+                InputStream inputStream = serverSocketConnectionManager.getCurrentSocket().getInputStream();
+                enteringPackets = new DataInputStream(inputStream);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
         try {
             _update();
         } catch (IOException e) {
@@ -76,14 +99,21 @@ public class SocketListenerManager implements ListenerManager {
         }
     }
 
+    @Override
+    public void finish() {
+        try {
+            enteringPackets.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void _update() throws IOException {
-        InputStream inputStream = serverSocketConnectionManager.getCurrentSocket().getInputStream();
-        DataInputStream dis = new DataInputStream(inputStream);
-        int limit = dis.available();
+        int limit = enteringPackets.available();
 
         if (limit>=Integer.BYTES) {
             int bytesRead = 0;
-            int bytesToRead = dis.readInt();
+            int bytesToRead = enteringPackets.readInt();
 
             ByteArrayOutputStream byteArrayInputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(byteArrayInputStream);
@@ -91,7 +121,7 @@ public class SocketListenerManager implements ListenerManager {
             byte[] partBytes = new byte[bytesToRead];
 
             do {
-                int actualReadBytes = dis.read(partBytes, 0, bytesToRead - bytesRead);
+                int actualReadBytes = enteringPackets.read(partBytes, 0, bytesToRead - bytesRead);
                 dataOutputStream.write(partBytes, 0, actualReadBytes);
                 bytesRead += actualReadBytes;
             } while (bytesRead != bytesToRead);

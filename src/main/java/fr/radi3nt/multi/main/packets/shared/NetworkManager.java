@@ -9,13 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class NetworkManager {
 
     private final Queue<PacketOut> queuedPackets = new ConcurrentLinkedQueue<>();
     private final List<QueueOptimizer> queueOptimizers = new ArrayList<>();
-    private final ReentrantReadWriteLock reentrantReadWriteLock = new ReentrantReadWriteLock();
+    private final Lock lock = new ReentrantLock(true);
     private final ConnectionManager connectionManager;
     private final PacketProtocol packetProtocol;
 
@@ -25,25 +27,13 @@ public class NetworkManager {
     }
 
     public void sendPacket(PacketOut packet) {
-
-        /*
-        if (isConnected()) {
-            this.sendQueuedLeft();
-            this.actuallySendPacket(packet);
-        } else {
-            reentrantReadWriteLock.writeLock().lock();
-            this.queuedPackets.add(new QueuedPacket(packet));
-            reentrantReadWriteLock.writeLock().unlock();
-        }
-        */
-
-        reentrantReadWriteLock.writeLock().lock();
         for (QueueOptimizer queueOptimizer : queueOptimizers) {
-            queueOptimizer.packetAdded(packet, queuedPackets);
+            synchronized (lock) {
+                queueOptimizer.packetAdded(packet, queuedPackets);
+            }
         }
-        this.queuedPackets.add(packet);
-        reentrantReadWriteLock.writeLock().unlock();
 
+        this.queuedPackets.add(packet);
     }
 
     public void sendPackets() {
@@ -55,16 +45,17 @@ public class NetworkManager {
     }
 
     private void sendQueuedLeft() {
-        reentrantReadWriteLock.readLock().lock();
 
         while(!this.queuedPackets.isEmpty()) {
-            PacketOut queuedPacket = this.queuedPackets.poll();
+            PacketOut queuedPacket;
+            synchronized (lock) {
+                queuedPacket = this.queuedPackets.poll();
+            }
             if (connectionManager.isConnected()) {
                 actuallySendPacket(queuedPacket);
             }
         }
 
-        reentrantReadWriteLock.readLock().unlock();
     }
 
     public void addInterceptor(PacketInterceptor packetInterceptor) {
