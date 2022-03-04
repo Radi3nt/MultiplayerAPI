@@ -3,23 +3,14 @@ package fr.radi3nt.multi.sockets.shared.distant.request.impl;
 import fr.radi3nt.multi.sockets.shared.distant.connection.connections.Connection;
 import fr.radi3nt.multi.sockets.shared.distant.request.Request;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class SocketRequest implements Request {
 
-    private final long id;
-    private byte[] data;
-
-    public SocketRequest() {
-        this.id = SocketRequestIdCreator.generateId();
-    }
+    private final byte[] data;
 
     public SocketRequest(byte[] data) {
-        this.id = SocketRequestIdCreator.generateId();
-        this.data = data;
-    }
-
-    protected void setData(byte[] data) {
         this.data = data;
     }
 
@@ -31,12 +22,8 @@ public class SocketRequest implements Request {
         }
     }
 
-    protected long getId() {
-        return id;
-    }
-
     @Override
     public void terminate() {
-        SocketRequestIdCreator.releaseId(id);
+
     }
 }

@@ -12,7 +12,7 @@ public class PacketSizeProperty implements PacketProperty {
     private int sizeDecoded;
 
     public PacketSizeProperty(PacketDataBufferProvider packetDataBufferProvider) {
-        packetDataBuffer = packetDataBufferProvider.createBuffer(Integer.BYTES);;
+        packetDataBuffer = packetDataBufferProvider.createBuffer(Integer.BYTES);
     }
 
     @Override
