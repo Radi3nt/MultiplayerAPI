@@ -117,7 +117,7 @@ public class PacketMainServer {
                 socketConnectionListener.get().update();
             }
             System.out.println("terminated connection listener");
-        });
+        }, "Connection listener");
         thread.start();
 
 
