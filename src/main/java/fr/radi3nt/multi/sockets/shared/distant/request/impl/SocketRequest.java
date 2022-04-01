@@ -5,18 +5,19 @@ import fr.radi3nt.multi.sockets.shared.distant.request.Request;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 public class SocketRequest implements Request {
 
-    private final byte[] data;
+    private final ByteBuffer data;
 
-    public SocketRequest(byte[] data) {
+    public SocketRequest(ByteBuffer data) {
         this.data = data;
     }
 
     public void send(Connection connection, OutputStream socket) {
         try {
-            socket.write(data);
+            socket.write(data.array());
         } catch (IOException e) {
             e.printStackTrace();
         }

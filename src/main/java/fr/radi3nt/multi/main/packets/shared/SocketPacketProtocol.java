@@ -111,7 +111,7 @@ public class SocketPacketProtocol implements PacketProtocol {
         content.getBuffer().flip();
         result.write(content);
 
-        communicationManager.send(new SocketRequest(result.getContent()));
+        communicationManager.send(new SocketRequest(result.getBuffer()));
 
         /*
         PacketDataBuffer packetDataBuffer = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(packet.getByteSize()+ BYTES_SIZE_COMPRESSED + BYTES_SIZE_DECOMPRESSED +Byte.BYTES));
