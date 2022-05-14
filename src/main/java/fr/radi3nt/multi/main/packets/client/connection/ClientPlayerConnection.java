@@ -1,8 +1,5 @@
 package fr.radi3nt.multi.main.packets.client.connection;
 
-import fr.radi3nt.multi.main.packets.client.packets.PacketInServerStop;
-import fr.radi3nt.multi.main.packets.client.packets.alive.PacketInServerAskKeepAlive;
-import fr.radi3nt.multi.main.packets.client.packets.alive.PacketOutResponseKeepAlive;
 import fr.radi3nt.multi.main.packets.shared.NetworkManager;
 import fr.radi3nt.multi.packets.data.types.PacketIn;
 import fr.radi3nt.multi.packets.data.types.PacketOut;
@@ -21,15 +18,6 @@ public class ClientPlayerConnection {
         networkManager.addInterceptor(new PacketInterceptor() {
             @Override
             public PacketIn onPacketIn(PacketIn packet) {
-
-                if (packet instanceof PacketInServerAskKeepAlive) {
-                    networkManager.sendPacket(new PacketOutResponseKeepAlive());
-                }
-                if (packet instanceof PacketInServerStop) {
-                    connection.getConnectionManager().close();
-                    System.out.println("Client: server stopped with reason: " + ((PacketInServerStop) packet).getReason());
-                }
-
                 return packet;
             }
 

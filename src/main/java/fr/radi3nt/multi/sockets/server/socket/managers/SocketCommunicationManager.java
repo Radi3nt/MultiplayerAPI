@@ -32,6 +32,8 @@ public class SocketCommunicationManager implements CommunicationManager {
             }
         }
 
-        request.send(connection, dataOutputStream);
+        if (!request.send(connection, dataOutputStream)) {
+            serverSocketConnectionManager.close();
+        }
     }
 }

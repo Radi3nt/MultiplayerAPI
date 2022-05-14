@@ -1,6 +1,5 @@
 package fr.radi3nt.multi.main.packets.shared;
 
-import fr.radi3nt.multi.packets.data.Packet;
 import fr.radi3nt.multi.packets.data.types.PacketIn;
 import fr.radi3nt.multi.packets.types.PacketIdentifier;
 import fr.radi3nt.multi.packets.types.PacketType;
@@ -22,7 +21,7 @@ public class ContextPacketIndexer implements PacketIdentifier {
         return null;
     }
 
-    public void addPacketType(PacketType packetType, Supplier<PacketIn> supplier) {
+    public void addInPacketType(PacketType packetType, Supplier<PacketIn> supplier) {
         packetTypes.put(packetType, supplier);
     }
 }

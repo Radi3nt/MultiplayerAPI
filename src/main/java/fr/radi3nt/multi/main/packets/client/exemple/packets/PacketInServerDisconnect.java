@@ -1,13 +1,14 @@
-package fr.radi3nt.multi.main.packets.client.packets;
+package fr.radi3nt.multi.main.packets.client.exemple.packets;
 
 import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 import fr.radi3nt.multi.packets.data.serializer.types.StringSerializer;
 import fr.radi3nt.multi.packets.data.types.PacketIn;
+import fr.radi3nt.multi.packets.types.IdPacketType;
 import fr.radi3nt.multi.packets.types.PacketType;
 
-public class PacketInServerStop implements PacketIn {
+public class PacketInServerDisconnect implements PacketIn {
 
-    public static final PacketType PACKET_TYPE = new PacketType(2);
+    public static final PacketType PACKET_TYPE = new IdPacketType(3);
     private String reason;
 
     @Override

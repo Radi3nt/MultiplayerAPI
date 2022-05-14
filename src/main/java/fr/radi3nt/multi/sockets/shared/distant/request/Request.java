@@ -6,7 +6,6 @@ import java.io.OutputStream;
 
 public interface Request {
 
-    void send(Connection connection, OutputStream outputStream);
-    void terminate();
+    boolean send(Connection connection, OutputStream outputStream);
 
 }

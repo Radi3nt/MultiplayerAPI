@@ -1,12 +1,13 @@
-package fr.radi3nt.multi.main.packets.client.packets;
+package fr.radi3nt.multi.main.packets.server.exemple.packets.alive;
 
 import fr.radi3nt.multi.packets.data.serializer.PacketDataBuffer;
 import fr.radi3nt.multi.packets.data.types.PacketOut;
+import fr.radi3nt.multi.packets.types.IdPacketType;
 import fr.radi3nt.multi.packets.types.PacketType;
 
-public class PacketOutClientDisconnect implements PacketOut {
+public class PacketOutServerAskKeepAlive implements PacketOut {
 
-    private static final PacketType PACKET_TYPE = new PacketType(3);
+    public static final PacketType PACKET_TYPE = new IdPacketType(1);
 
     @Override
     public void save(PacketDataBuffer packetDataBuffer) {
@@ -22,4 +23,5 @@ public class PacketOutClientDisconnect implements PacketOut {
     public PacketType getType() {
         return PACKET_TYPE;
     }
+
 }

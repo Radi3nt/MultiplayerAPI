@@ -1,11 +1,11 @@
-package fr.radi3nt.multi.main.packets.server;
+package fr.radi3nt.multi.main.packets.server.exemple;
 
-import fr.radi3nt.multi.main.packets.client.PacketMainClient;
+import fr.radi3nt.multi.main.packets.client.exemple.PacketMainClient;
 import fr.radi3nt.multi.main.packets.server.connection.ServerPlayerConnection;
-import fr.radi3nt.multi.main.packets.server.packets.PacketInClientDisconnect;
-import fr.radi3nt.multi.main.packets.server.packets.PacketOutServerStop;
-import fr.radi3nt.multi.main.packets.server.packets.alive.PacketInResponseKeepAlive;
-import fr.radi3nt.multi.main.packets.server.packets.alive.PacketOutServerAskKeepAlive;
+import fr.radi3nt.multi.main.packets.server.exemple.packets.PacketInClientDisconnect;
+import fr.radi3nt.multi.main.packets.server.exemple.packets.PacketOutServerDisconnect;
+import fr.radi3nt.multi.main.packets.server.exemple.packets.alive.PacketInResponseKeepAlive;
+import fr.radi3nt.multi.main.packets.server.exemple.packets.alive.PacketOutServerAskKeepAlive;
 import fr.radi3nt.multi.main.packets.shared.ByteBufferPacketDataBuffer;
 import fr.radi3nt.multi.main.packets.shared.ContextPacketIndexer;
 import fr.radi3nt.multi.main.packets.shared.NetworkManager;
@@ -38,8 +38,8 @@ public class PacketMainServer {
         Scanner sc = new Scanner(System.in);
 
         ContextPacketIndexer contextPacketIndexer = new ContextPacketIndexer();
-        contextPacketIndexer.addPacketType(PacketInResponseKeepAlive.PACKET_TYPE, PacketInResponseKeepAlive::new);
-        contextPacketIndexer.addPacketType(PacketInClientDisconnect.PACKET_TYPE, PacketInClientDisconnect::new);
+        contextPacketIndexer.addInPacketType(PacketInResponseKeepAlive.PACKET_TYPE, PacketInResponseKeepAlive::new);
+        contextPacketIndexer.addInPacketType(PacketInClientDisconnect.PACKET_TYPE, PacketInClientDisconnect::new);
         //contextPacketIndexer.addPacketType(PacketOutServerAskKeepAlive.PACKET_TYPE, PacketOutServerAskKeepAlive::new);
 
         AtomicReference<SocketConnectionListener> socketConnectionListener = new AtomicReference<>();
@@ -96,7 +96,7 @@ public class PacketMainServer {
                                     break;
                                 }
                                 case "disconnect": {
-                                    serverPlayerConnection.sendPacket(new PacketOutServerStop("Server kicked you"));
+                                    serverPlayerConnection.sendPacket(new PacketOutServerDisconnect("Server kicked you"));
                                     connection.getConnectionManager().close();
                                     return;
                                 }

@@ -15,16 +15,14 @@ public class SocketRequest implements Request {
         this.data = data;
     }
 
-    public void send(Connection connection, OutputStream socket) {
+    public boolean send(Connection connection, OutputStream socket) {
         try {
             socket.write(data.array());
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
-    @Override
-    public void terminate() {
-
-    }
 }

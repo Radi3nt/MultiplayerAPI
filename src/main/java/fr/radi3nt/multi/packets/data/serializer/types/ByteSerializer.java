@@ -6,6 +6,9 @@ import java.nio.ByteBuffer;
 
 public class ByteSerializer implements PacketSerializer {
 
+    public static final byte TRUE_VALUE = 0;
+    public static final byte FALSE_VALUE = 1;
+    
     private byte actualByte;
 
     public ByteSerializer(byte actualByte) {
@@ -13,6 +16,10 @@ public class ByteSerializer implements PacketSerializer {
     }
 
     public ByteSerializer() {
+    }
+
+    public ByteSerializer(boolean canEdit) {
+        this.actualByte = canEdit ? TRUE_VALUE : FALSE_VALUE;
     }
 
     @Override

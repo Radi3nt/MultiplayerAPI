@@ -1,9 +1,9 @@
-package fr.radi3nt.multi.main.packets.client;
+package fr.radi3nt.multi.main.packets.client.exemple;
 
 import fr.radi3nt.multi.main.packets.client.connection.ClientPlayerConnection;
-import fr.radi3nt.multi.main.packets.client.packets.PacketInServerStop;
-import fr.radi3nt.multi.main.packets.client.packets.PacketOutClientDisconnect;
-import fr.radi3nt.multi.main.packets.client.packets.alive.PacketInServerAskKeepAlive;
+import fr.radi3nt.multi.main.packets.client.exemple.packets.PacketInServerDisconnect;
+import fr.radi3nt.multi.main.packets.client.exemple.packets.PacketOutClientDisconnect;
+import fr.radi3nt.multi.main.packets.client.exemple.packets.alive.PacketInServerAskKeepAlive;
 import fr.radi3nt.multi.main.packets.shared.ByteBufferPacketDataBuffer;
 import fr.radi3nt.multi.main.packets.shared.ContextPacketIndexer;
 import fr.radi3nt.multi.main.packets.shared.NetworkManager;
@@ -37,8 +37,8 @@ public class PacketMainClient {
         Scanner scanner = new Scanner(System.in);
 
         ContextPacketIndexer contextPacketIndexer = new ContextPacketIndexer();
-        contextPacketIndexer.addPacketType(PacketInServerAskKeepAlive.PACKET_TYPE, PacketInServerAskKeepAlive::new);
-        contextPacketIndexer.addPacketType(PacketInServerStop.PACKET_TYPE, PacketInServerStop::new);
+        contextPacketIndexer.addInPacketType(PacketInServerAskKeepAlive.PACKET_TYPE, PacketInServerAskKeepAlive::new);
+        contextPacketIndexer.addInPacketType(PacketInServerDisconnect.PACKET_TYPE, PacketInServerDisconnect::new);
         //contextPacketIndexer.addPacketType(PacketOutResponseKeepAlive.PACKET_TYPE);
 
         ClientConnection socketClientConnection = new SocketClientConnection(new Address("localhost", PORT));
