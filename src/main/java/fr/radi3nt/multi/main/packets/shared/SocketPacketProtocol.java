@@ -7,13 +7,6 @@ import fr.radi3nt.multi.packets.data.types.PacketOut;
 import fr.radi3nt.multi.packets.logic.PacketInterceptor;
 import fr.radi3nt.multi.packets.logic.PacketProtocol;
 import fr.radi3nt.multi.packets.module.list.PacketPropertyList;
-import fr.radi3nt.multi.packets.process.recieving.PacketDecoder;
-import fr.radi3nt.multi.packets.process.recieving.PacketDecompressor;
-import fr.radi3nt.multi.packets.process.recieving.PacketDecrypter;
-import fr.radi3nt.multi.packets.process.sending.PacketCompressor;
-import fr.radi3nt.multi.packets.process.sending.PacketEncoder;
-import fr.radi3nt.multi.packets.process.sending.PacketEncryptor;
-import fr.radi3nt.multi.packets.types.PacketIdentifier;
 import fr.radi3nt.multi.sockets.shared.distant.managing.managers.shared.CommunicationManager;
 import fr.radi3nt.multi.sockets.shared.distant.managing.managers.shared.ListenerManager;
 import fr.radi3nt.multi.sockets.shared.distant.request.impl.SocketRequest;
@@ -26,40 +19,17 @@ import java.util.List;
 
 public class SocketPacketProtocol implements PacketProtocol {
 
-    private static final int MIN_BYTES_TO_ENCRYPT = 600;
-    private static final int BYTES_SIZE_DECOMPRESSED = Integer.BYTES;
-    private static final int BYTES_SIZE_COMPRESSED = Integer.BYTES;
-
     private final CommunicationManager communicationManager;
-    private final ListenerManager listenerManager;
-
-    private final PacketEncoder packetEncoder;
-    private final PacketDecoder packetDecoder;
-
-
-    private final PacketEncryptor packetEncryptor;
-    private final PacketDecrypter packetDecrypter;
-
-    private final PacketCompressor packetCompressor;
-    private final PacketDecompressor packetDecompressor;
-
     private final PacketPropertyList packetPropertyList;
 
 
     private final List<PacketInterceptor> packetInterceptors = new ArrayList<>();
 
-    public SocketPacketProtocol(CommunicationManager communicationManager, ListenerManager listenerManager, PacketIdentifier packetIdentifier, PacketEncryptor packetEncryptor, PacketDecrypter packetDecrypter, PacketCompressor packetCompressor, PacketDecompressor packetDecompressor, PacketPropertyList packetPropertyList) {
+    public SocketPacketProtocol(CommunicationManager communicationManager, ListenerManager listenerManager, PacketPropertyList packetPropertyList) {
         this.communicationManager = communicationManager;
-        this.listenerManager = listenerManager;
-        this.packetEncryptor = packetEncryptor;
-        this.packetDecrypter = packetDecrypter;
-        this.packetCompressor = packetCompressor;
-        this.packetDecompressor = packetDecompressor;
         this.packetPropertyList = packetPropertyList;
-        this.packetEncoder = new PacketEncoder();
-        this.packetDecoder = new PacketDecoder(packetIdentifier);
 
-        this.listenerManager.addListener(dataInputStream -> {
+        listenerManager.addListener(dataInputStream -> {
             try {
                 receivePacket(dataInputStream);
             } catch (IOException e) {
@@ -113,27 +83,6 @@ public class SocketPacketProtocol implements PacketProtocol {
 
         communicationManager.send(new SocketRequest(result.getBuffer()));
 
-        /*
-        PacketDataBuffer packetDataBuffer = new ByteBufferPacketDataBuffer(ByteBuffer.allocate(packet.getByteSize()+ BYTES_SIZE_COMPRESSED + BYTES_SIZE_DECOMPRESSED +Byte.BYTES));
-
-        boolean needCompress = packetDataBuffer.getSize()>=MIN_BYTES_TO_ENCRYPT;
-        if (!needCompress) {
-            packetDataBuffer.write(new IntSerializer(packetDataBuffer.getSize()-BYTES_SIZE_COMPRESSED));
-            packetDataBuffer.write(new IntSerializer(-1));
-        }
-
-        packetEncoder.encode(packet, packetDataBuffer);
-        packetDataBuffer.getBuffer().flip();
-
-        PacketDataBuffer actualSerializer = packetDataBuffer;
-        if (needCompress) {
-            actualSerializer = packetCompressor.compress(packetDataBuffer);
-            actualSerializer.getBuffer().flip();
-        }
-
-        communicationManager.send(new SocketRequest(actualSerializer.getContent()));
-
-         */
     }
 
     @Override

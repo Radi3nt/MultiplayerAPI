@@ -3,10 +3,13 @@ package fr.radi3nt.multi.sockets.server.socket.managers;
 import fr.radi3nt.multi.sockets.shared.distant.managing.listener.ConnectionListener;
 import fr.radi3nt.multi.sockets.shared.distant.managing.managers.impl.SocketConnectionManager;
 import fr.radi3nt.multi.sockets.shared.distant.managing.managers.shared.ListenerManager;
-import fr.radi3nt.multi.sockets.shared.util.Timings;
 
 import java.io.*;
-import java.util.*;
+import java.net.SocketException;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -95,6 +98,9 @@ public class SocketListenerManager implements ListenerManager {
         try {
             _update();
         } catch (IOException e) {
+            if (e instanceof SocketException) {
+                serverSocketConnectionManager.close();
+            }
             e.printStackTrace();
         }
     }
