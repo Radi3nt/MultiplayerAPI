@@ -18,12 +18,10 @@
   </ol>
 </details>
 
-
+# ⚠This project is no longer maintained, it has been moved to this [repository](https://github.com/Radi3nt/NetworkingAPI)⚠
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-
-⚠This project is no longer maintained, it has been moved to this [repository](https://github.com/Radi3nt/NetworkingAPI)
 
 This is a complete networking API to use with Java. It provides default implementation with sockets
 Why SHOULD you use this API:
